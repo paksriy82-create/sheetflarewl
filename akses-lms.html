@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learning Center - SpotDigital</title>
+    <script src="config.js?v=2026"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="bg-slate-50 font-['Plus_Jakarta_Sans']">
+    <div id="loader" class="fixed inset-0 bg-white z-[99] flex items-center justify-center font-bold text-indigo-600 italic animate-pulse">Memverifikasi Akses...</div>
+
+    <main id="main-content" class="max-w-5xl mx-auto p-6 md:p-10 hidden">
+        <a href="member.html" class="inline-flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-indigo-600 mb-8 uppercase tracking-widest">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i> Kembali ke Dashboard
+        </a>
+
+        <div class="bg-white rounded-[2.5rem] overflow-hidden shadow-2xl border border-slate-100">
+            <div class="aspect-video bg-black relative">
+                <iframe id="video-frame" class="w-full h-full absolute inset-0" src="" frameborder="0" allowfullscreen></iframe>
+            </div>
+            
+            <div class="p-8 md:p-12">
+                <h1 id="materi-title" class="text-3xl md:text-4xl font-black text-slate-900 mb-6 tracking-tight leading-tight">...</h1>
+                <div class="h-px bg-slate-100 w-full mb-8"></div>
+                <div id="materi-desc" class="prose prose-slate max-w-none text-slate-600 leading-relaxed text-lg">
+                    </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        async function verifyAndLoad() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const productId = urlParams.get('id');
+            const userEmail = sessionStorage.getItem('user_email');
+
+            if (!userEmail || !productId) { window.location.replace('login.html'); return; }
+
+            try {
+                const targetUrl = window.SCRIPT_URL || SCRIPT_URL;
+                const res = await fetch(targetUrl, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'get_lms_materi', email: userEmail, product_id: productId })
+                });
+                const r = await res.json();
+
+                if (r.status === 'success') {
+                    document.getElementById('materi-title').innerText = r.data.title;
+                    document.getElementById('materi-desc').innerHTML = r.data.desc;
+                    document.getElementById('video-frame').src = `https://www.youtube.com/embed/${r.data.video_id}?rel=0&modestbranding=1`;
+                    
+                    document.getElementById('loader').classList.add('hidden');
+                    document.getElementById('main-content').classList.remove('hidden');
+                    lucide.createIcons();
+                } else {
+                    alert("Akses Ditolak: Anda belum membeli produk ini atau sesi berakhir.");
+                    window.location.replace('member.html');
+                }
+            } catch (e) { alert("Gagal memverifikasi akses."); }
+        }
+        window.onload = verifyAndLoad;
+    </script>
+</body>
+</html>
