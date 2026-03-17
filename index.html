@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <script>
+        const path = window.location.pathname;
+        const cleanSlug = path.replace(/^\/|\/$/g, '');
+        const baseSlug = cleanSlug.replace(/\.html$/, '');
+        
+        const corePages = ['login', 'dashboard', 'checkout', 'admin-area', 'akses'];
+
+        let isCorePage = corePages.includes(baseSlug);
+        let isRedirecting = false;
+
+        if (isCorePage) {
+            if (!path.endsWith('.html')) {
+                isRedirecting = true;
+                window.location.replace('/' + baseSlug + '.html' + window.location.search);
+            }
+        }
+    </script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Platform penyedia produk digital dan kursus online terpercaya di Indonesia.">
+    <title>Sistem Digital - Solusi Kreator</title>
+
+    <link rel="preconnect" href="https://docs.google.com">
+    <link rel="dns-prefetch" href="https://docs.google.com">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <script src="config.js?v=2026"></script>
+    
+    <script>
+        const USE_CUSTOM_HOME_FLAG = 'omnicloud_has_custom_home';
+        const CACHE_KEY_HOME = 'omnicloud_home_page_data';
+
+        if (isRedirecting) {
+            document.documentElement.className = 'mode-loading'; 
+        } else if (cleanSlug === '') {
+            const hasCustomHome = localStorage.getItem(USE_CUSTOM_HOME_FLAG);
+            const cachedHomeStr = localStorage.getItem(CACHE_KEY_HOME);
+            if (hasCustomHome === 'true' && cachedHomeStr) {
+                document.documentElement.className = 'mode-cms';
+            } else if (hasCustomHome === 'false') {
+                document.documentElement.className = 'mode-default';
+            } else {
+                document.documentElement.className = 'mode-loading'; 
+            }
+        } else {
+            document.documentElement.className = 'mode-loading'; 
+        }
+
+        // Branding Instan & Sinkronisasi Global
+        (function() {
+            const CACHE_KEY = 'melimpah_global_settings';
+            const CACHE_AGE = 60 * 60 * 1000; 
+            window.waAdminGlobal = '';
+
+            function applyGlobalSettings(data) {
+                if(data.site_favicon) {
+                    let link = document.querySelector("link[rel~='icon']");
+                    if (!link) { link = document.createElement('link'); link.rel = 'icon'; document.head.appendChild(link); }
+                    link.href = data.site_favicon;
+                }
+                if(data.wa_admin) window.waAdminGlobal = data.wa_admin;
+                if(data.site_name) {
+                    document.title = document.title.replace(/Sistem Digital/gi, data.site_name);
+                }
+
+                const updateDomElements = () => {
+                    if(data.affiliate_commission) {
+                        const commEl = document.getElementById('display-comm-rate');
+                        if(commEl) commEl.innerText = data.affiliate_commission + '%';
+                    }
+                    if(data.site_name) {
+                        document.querySelectorAll('.dyn-site-name').forEach(el => el.innerText = data.site_name);
+                    }
+                    if(data.site_tagline) {
+                        document.querySelectorAll('.dyn-site-tagline').forEach(el => el.innerText = data.site_tagline);
+                    }
+                };
+
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', updateDomElements);
+                } else {
+                    updateDomElements();
+                }
+            }
+
+            const cachedStr = localStorage.getItem(CACHE_KEY);
+            let cached = null;
+            try { cached = JSON.parse(cachedStr); } catch(e){}
+            const now = Date.now();
+
+            if (cached && cached.data) { applyGlobalSettings(cached.data); }
+
+            if (!cached || !cached.time || (now - cached.time > CACHE_AGE)) {
+                if(typeof SCRIPT_URL !== 'undefined' && SCRIPT_URL !== 'ISI_DENGAN_LINK_WEB_APP_GOOGLE_SCRIPT_ANDA_DISINI') {
+                    fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'get_global_settings' }) })
+                        .then(res => res.json())
+                        .then(r => {
+                            if(r.status === 'success') {
+                                localStorage.setItem(CACHE_KEY, JSON.stringify({ data: r.data, time: now }));
+                                applyGlobalSettings(r.data); 
+                            }
+                        }).catch(e => console.error("Global Sync Failed"));
+                }
+            }
+        })();
+    </script>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest" defer></script>
+
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; margin:0; padding:0; background:#f8f9fa; overflow-x: hidden; -webkit-font-smoothing: antialiased;}
+        
+        .mode-cms #default-home-container { display: none !important; }
+        .mode-default #cms-home-container { display: none !important; }
+        
+        .mode-cms #neutral-loader:not(.transitioning), 
+        .mode-default #neutral-loader:not(.transitioning) { display: none !important; }
+        
+        .mode-loading #cms-home-container, .mode-loading #default-home-container { display: none !important; }
+        
+        #neutral-loader { transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.5s ease-out; }
+        #neutral-loader.fade-out { opacity: 0; visibility: hidden; pointer-events: none; }
+        
+        .fade-in { animation: fadeIn 0.5s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        .progress-ring__circle { transition: stroke-dashoffset 0.1s ease-out; transform: rotate(-90deg); transform-origin: 50% 50%; }
+        @keyframes ambient-glow { 0%, 100% { opacity: 0.4; transform: scale(1); } 50% { opacity: 0.7; transform: scale(1.1); } }
+        .animate-ambient { animation: ambient-glow 3s ease-in-out infinite; }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <div id="neutral-loader" style="position: fixed; inset: 0; width: 100vw; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: #f8f9fa; z-index: 9999;" class="overflow-hidden">
+        
+        <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none;">
+            <div class="absolute w-72 h-72 bg-indigo-500/20 rounded-full blur-[80px] animate-ambient"></div>
+            <div class="absolute w-56 h-56 bg-blue-400/20 rounded-full blur-[60px] animate-ambient" style="animation-delay: 1.5s;"></div>
+        </div>
+
+        <div style="position: relative; width: 160px; height: 160px; display: flex; align-items: center; justify-content: center; z-index: 10;" class="drop-shadow-2xl">
+            <svg style="position: absolute; inset: 0; width: 100%; height: 100%;" width="160" height="160" viewBox="0 0 160 160">
+                <defs>
+                    <linearGradient id="loaderGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#3b82f6" />
+                        <stop offset="100%" stop-color="#4f46e5" />
+                    </linearGradient>
+                    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                        <feGaussianBlur stdDeviation="4" result="blur" />
+                        <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                    </filter>
+                </defs>
+                <circle cx="80" cy="80" r="70" fill="none" stroke="#e2e8f0" stroke-width="8" opacity="0.5" />
+                <circle id="loading-circle" class="progress-ring__circle" cx="80" cy="80" r="70" fill="none" stroke="url(#loaderGrad)" stroke-width="8" stroke-linecap="round" filter="url(#glow)" />
+            </svg>
+            <div style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                <span id="loading-percentage" style="font-size: 2.25rem; font-weight: 900; background: linear-gradient(to bottom right, #4f46e5, #3b82f6); -webkit-background-clip: text; color: transparent; letter-spacing: -0.05em;">15%</span>
+            </div>
+        </div>
+        <h1 style="margin-top: 2rem; font-size: 1.125rem; font-weight: 900; color: #334155; letter-spacing: 0.1em; text-transform: uppercase; position: relative; z-index: 10;" class="dyn-site-name">Sistem Digital</h1>
+        <div style="width: 3rem; height: 0.25rem; background-color: #6366f1; border-radius: 9999px; margin-top: 0.75rem; opacity: 0.5; position: relative; z-index: 10;"></div>
+
+        <script>
+            (function(){
+                if(document.documentElement.className !== 'mode-loading') return;
+
+                const loaderEl = document.getElementById('neutral-loader');
+                const circle = document.getElementById('loading-circle');
+                const text = document.getElementById('loading-percentage');
+                const radius = circle.r.baseVal.value;
+                const circumference = radius * 2 * Math.PI; 
+
+                circle.style.strokeDasharray = `${circumference} ${circumference}`;
+                circle.style.strokeDashoffset = circumference;
+
+                let currentPerc = Math.floor(Math.random() * 8) + 15; 
+                let loaderTimeout;
+                
+                function updateProgress(percent) {
+                    const offset = circumference - (percent / 100) * circumference;
+                    circle.style.strokeDashoffset = offset;
+                    text.innerText = percent + '%';
+                }
+                updateProgress(currentPerc);
+
+                function tickLoading() {
+                    if (currentPerc < 99) {
+                        currentPerc += Math.floor(Math.random() * 4) + 1; 
+                        if (currentPerc > 99) currentPerc = 99; 
+                        updateProgress(currentPerc);
+                        loaderTimeout = setTimeout(tickLoading, Math.floor(Math.random() * 40) + 30); 
+                    }
+                }
+                tickLoading(); 
+
+                window.completeLoadingAnimation = function(callback) {
+                    clearTimeout(loaderTimeout);
+                    updateProgress(100); 
+                    
+                    loaderEl.classList.add('transitioning');
+                    loaderEl.style.setProperty('display', 'flex', 'important');
+                    
+                    setTimeout(() => { 
+                        loaderEl.classList.add('fade-out');
+                        setTimeout(() => {
+                            loaderEl.style.setProperty('display', 'none', 'important');
+                            loaderEl.classList.remove('transitioning');
+                            if(callback) callback();
+                        }, 500); 
+                    }, 300); 
+                }
+            })();
+        </script>
+    </div>
+
+    <div id="cms-home-container" class="w-full min-h-screen fade-in"></div>
+
+    <div id="default-home-container" class="w-full min-h-screen fade-in">
+        <header class="bg-white/80 backdrop-blur-md border-b sticky top-0 z-50">
+            <div class="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
+               <div class="text-xl md:text-2xl font-black text-indigo-600 tracking-tighter uppercase flex items-center gap-2">
+                    <svg class="w-6 h-6 md:w-8 md:h-8" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+                    <strong class="dyn-site-name">SISTEM DIGITAL</strong>
+                </div>
+                <a href="/login" class="bg-indigo-600 text-white px-6 py-2.5 rounded-full font-bold text-sm shadow-md shadow-indigo-200 hover:bg-indigo-700 hover:scale-105 transition-all flex items-center">
+                    Login <svg class="w-4 h-4 ml-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                </a>
+            </div>
+        </header>
+
+        <section class="max-w-7xl mx-auto px-6 py-20 text-center">
+            <div class="inline-block bg-indigo-50 text-indigo-600 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest mb-6">Visi Baru Kreator</div>
+            <h1 class="text-4xl md:text-6xl font-black tracking-tight mb-6 text-slate-900">Tingkatkan Bisnis Digital Anda <br><span class="text-indigo-600">Hari Ini Juga.</span></h1>
+            <p class="text-lg text-slate-500 max-w-2xl mx-auto mb-10 dyn-site-tagline">Akses puluhan produk digital, template, dan kursus premium untuk memaksimalkan potensi bisnis dan konten Anda di era digital.</p>
+            <a href="#katalog" class="inline-block bg-slate-900 text-white px-8 py-4 rounded-full font-bold text-lg shadow-xl shadow-slate-300 hover:scale-105 transition-all">Lihat Katalog Produk</a>
+        </section>
+
+        <section id="katalog" class="max-w-7xl mx-auto px-6 py-10 mb-20 scroll-mt-24">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-black mb-4">Produk Digital Kami</h2>
+                <p class="text-slate-500">Pilih produk yang paling sesuai dengan kebutuhan Anda.</p>
+            </div>
+            
+            <div id="public-products" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="col-span-full text-center py-4 mb-2"><p class="text-slate-400 text-xs font-bold uppercase tracking-[0.2em] animate-pulse">Menarik Data Produk Terbaru...</p></div>
+                <div class="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col h-full animate-pulse"><div class="h-6 bg-slate-100 rounded-full w-24 mb-6"></div><div class="h-6 bg-slate-100 rounded w-3/4 mb-4"></div><div class="h-4 bg-slate-100 rounded w-full mb-2"></div><div class="h-4 bg-slate-100 rounded w-5/6 mb-8 flex-1"></div><div class="flex justify-between pt-6 border-t border-slate-50"><div class="h-6 bg-slate-100 rounded w-24"></div><div class="h-10 bg-slate-100 rounded-xl w-28"></div></div></div>
+                <div class="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col h-full animate-pulse hidden md:flex"><div class="h-6 bg-slate-100 rounded-full w-24 mb-6"></div><div class="h-6 bg-slate-100 rounded w-3/4 mb-4"></div><div class="h-4 bg-slate-100 rounded w-full mb-2"></div><div class="h-4 bg-slate-100 rounded w-5/6 mb-8 flex-1"></div><div class="flex justify-between pt-6 border-t border-slate-50"><div class="h-6 bg-slate-100 rounded w-24"></div><div class="h-10 bg-slate-100 rounded-xl w-28"></div></div></div>
+                <div class="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col h-full animate-pulse hidden lg:flex"><div class="h-6 bg-slate-100 rounded-full w-24 mb-6"></div><div class="h-6 bg-slate-100 rounded w-3/4 mb-4"></div><div class="h-4 bg-slate-100 rounded w-full mb-2"></div><div class="h-4 bg-slate-100 rounded w-5/6 mb-8 flex-1"></div><div class="flex justify-between pt-6 border-t border-slate-50"><div class="h-6 bg-slate-100 rounded w-24"></div><div class="h-10 bg-slate-100 rounded-xl w-28"></div></div></div>
+            </div>
+        </section>
+
+        <footer class="bg-white border-t border-slate-200 py-12 mt-20">
+            <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
+                <div>
+                    <h3 class="text-xl font-black text-indigo-600 mb-4 dyn-site-name uppercase">SISTEM DIGITAL</h3>
+                    <p class="text-sm text-slate-500 dyn-site-tagline">Platform penyedia produk digital dan kursus online terpercaya di Indonesia.</p>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4 text-slate-800">Informasi</h4>
+                    <ul class="text-sm text-slate-500 space-y-2">
+                        <li><a href="/tentang-kami" class="hover:text-indigo-600 transition-colors">Tentang Kami</a></li>
+                        <li><a href="/syarat-ketentuan" class="hover:text-indigo-600 transition-colors">Syarat & Ketentuan</a></li>
+                        <li><a href="/kebijakan-privasi" class="hover:text-indigo-600 transition-colors">Kebijakan Privasi</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4 text-slate-800">Hubungi Kami</h4>
+                    <p class="text-sm text-slate-500 mb-2">Email: admin@domainanda.com</p>
+                    <p class="text-sm text-slate-500">WhatsApp: Nomor WA Admin</p>
+                </div>
+            </div>
+            <div class="text-center text-xs text-slate-400 mt-12 pt-8 border-t">
+                &copy; <span id="current-year"></span> <span class="dyn-site-name">Sistem Digital</span>. All rights reserved.
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        const currentMode = document.documentElement.className;
+        const cachedHomeStrGlobal = localStorage.getItem(CACHE_KEY_HOME);
+        const CACHE_KEY_CATALOG = 'melimpah_public_catalog';
+
+        // 1. INJEKSI CACHE INSTAN BERANDA CMS
+        if (currentMode === 'mode-cms' && cachedHomeStrGlobal) {
+            try {
+                const data = JSON.parse(cachedHomeStrGlobal);
+                const cmsContainer = document.getElementById('cms-home-container');
+                cmsContainer.innerHTML = data.html || '';
+                
+                let styleTag = document.getElementById('cms-custom-style');
+                if (!styleTag) { styleTag = document.createElement('style'); styleTag.id = 'cms-custom-style'; document.head.appendChild(styleTag); }
+                styleTag.innerHTML = data.css || '';
+                if(data.title) document.title = data.title;
+                
+                setTimeout(() => {
+                    const scripts = Array.from(cmsContainer.getElementsByTagName('script'));
+                    scripts.forEach(oldScript => {
+                        const newScript = document.createElement('script');
+                        Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+                        if (oldScript.src) newScript.src = oldScript.src; else newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+                        oldScript.parentNode.replaceChild(newScript, oldScript);
+                    });
+                    if(typeof lucide !== 'undefined') lucide.createIcons();
+                }, 10);
+            } catch(e) {}
+        }
+
+        const executeTransition = (callback) => {
+            if (window.completeLoadingAnimation) { 
+                callback(); 
+                window.completeLoadingAnimation(); 
+            } 
+            else { 
+                callback(); 
+            }
+        };
+
+        // FUNGSI RENDER KATALOG MASTER
+        function renderCatalog(products) {
+            const container = document.getElementById('public-products');
+            if (!products || products.length === 0) {
+                container.innerHTML = '<p class="text-slate-400 text-center col-span-full py-10 border-2 border-dashed rounded-3xl">Katalog belum ada atau periksa pengaturan akses Google Sheets Anda.</p>';
+                return;
+            }
+            container.innerHTML = [...products].reverse().map((p) => {
+                const targetLink = (p.lp_url && p.lp_url !== "") ? `/${p.lp_url.replace(/^\/|\/$/g, '').trim()}` : `/checkout?id=${p.id}`;
+                return `
+                <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-2 transition-all flex flex-col h-full">
+                    <div class="mb-6"><span class="bg-indigo-50 text-indigo-600 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest">PRODUK DIGITAL</span></div>
+                    <h3 class="text-xl font-bold text-slate-800 mb-2">${p.nama}</h3>
+                    <p class="text-sm text-slate-500 mb-8 flex-1 line-clamp-3">${p.deskripsi || 'Akses materi premium kami di sini.'}</p>
+                    <div class="flex items-center justify-between mt-auto pt-6 border-t border-slate-50">
+                        <span class="text-lg font-black text-slate-800">Rp ${Number(p.harga).toLocaleString('id-ID')}</span>
+                        <a href="${targetLink}" class="bg-slate-900 text-white px-6 py-3 rounded-xl font-bold text-xs hover:bg-indigo-600 transition-colors shadow-lg shadow-slate-200">Lihat Detail</a>
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+
+        // 2. PENARIK DATA LATAR BELAKANG
+        async function fetchPageDataFast() {
+            if (isRedirecting) return; 
+            
+            if (isCorePage) {
+                document.body.innerHTML = `<div style="text-align:center;padding-top:20vh;font-family:sans-serif;color:#1e293b;">
+                    <h2 style="font-size:32px;font-weight:900;">Sistem Terhenti</h2>
+                    <p style="color:#64748b;">Halaman <b>${baseSlug}.html</b> tidak ditemukan di Server/Cloudflare Anda.<br>Pastikan Anda telah mengupload seluruh file sistem dengan lengkap.</p>
+                </div>`;
+                return;
+            }
+
+            if(typeof SHEET_ID === 'undefined' || SHEET_ID === 'ID_SPREADSHEET_PEMBELI_DISINI') {
+                executeTransition(() => {
+                    document.documentElement.className = 'mode-default';
+                    document.getElementById('public-products').innerHTML = `
+                    <div class="col-span-full bg-red-50 border border-red-200 p-8 rounded-3xl text-center">
+                        <h3 class="text-xl font-bold text-red-700 mb-2">Konfigurasi Belum Selesai</h3>
+                        <p class="text-red-600 text-sm">Harap masukkan <b>SHEET_ID</b> yang benar di dalam file <code>config.js</code> Anda.</p>
+                    </div>`;
+                });
+                return;
+            }
+
+            try {
+                let targetSlug = cleanSlug;
+
+                // Cek Settingan Beranda
+                if (targetSlug === '') {
+                    const setRes = await fetch(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=Settings`);
+                    const setText = await setRes.text();
+                    const setJson = JSON.parse(setText.substring(47).slice(0, -2));
+                    
+                    if(setJson.table && setJson.table.rows) {
+                        setJson.table.rows.forEach(r => {
+                            if(r.c && r.c[0] && r.c[0].v === 'home_page_slug') {
+                                targetSlug = r.c[1] ? r.c[1].v : '';
+                            }
+                        });
+                    }
+                }
+
+                // Eksekusi Halaman CMS
+                if (targetSlug !== '') {
+                    const query = encodeURIComponent(`SELECT * WHERE B = '${targetSlug}' LIMIT 1`);
+                    const pageRes = await fetch(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=Pages&tq=${query}`);
+                    const pageText = await pageRes.text();
+                    const pageJson = JSON.parse(pageText.substring(47).slice(0, -2));
+                    
+                    if (pageJson.table && pageJson.table.rows && pageJson.table.rows.length > 0) {
+                        const row = pageJson.table.rows[0].c;
+                        const rData = { title: row[2]?row[2].v:'Halaman', html: row[3]?row[3].v:'', css: '' };
+                        const freshDataStr = JSON.stringify(rData);
+                        
+                        if (cleanSlug === '') {
+                            localStorage.setItem(USE_CUSTOM_HOME_FLAG, 'true');
+                            if (cachedHomeStrGlobal !== freshDataStr) {
+                                localStorage.setItem(CACHE_KEY_HOME, freshDataStr);
+                            }
+                        }
+
+                        executeTransition(() => {
+                            document.documentElement.className = 'mode-cms';
+                            const cmsContainer = document.getElementById('cms-home-container');
+                            cmsContainer.innerHTML = rData.html;
+                            
+                            let styleTag = document.getElementById('cms-custom-style');
+                            if (!styleTag) { styleTag = document.createElement('style'); styleTag.id = 'cms-custom-style'; document.head.appendChild(styleTag); }
+                            styleTag.innerHTML = rData.css || '';
+                            if(rData.title) document.title = rData.title;
+                            
+                            setTimeout(() => {
+                                const scripts = Array.from(cmsContainer.getElementsByTagName('script'));
+                                scripts.forEach(oldScript => {
+                                    const newScript = document.createElement('script');
+                                    Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+                                    if (oldScript.src) newScript.src = oldScript.src; else newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+                                    oldScript.parentNode.replaceChild(newScript, oldScript);
+                                });
+                                if(typeof lucide !== 'undefined') lucide.createIcons();
+                            }, 10);
+                        });
+                        return; 
+                    } else if (cleanSlug !== '') {
+                        executeTransition(() => {
+                            document.body.innerHTML = `
+                            <div style="font-family:sans-serif;text-align:center;padding-top:15vh;background:#f8f9fa;height:100vh;display:flex;flex-direction:column;align-items:center;">
+                                <h1 style="font-size:100px;margin:0;color:#1e293b;line-height:1;font-weight:900;">404</h1>
+                                <p style="color:#64748b;margin-bottom:30px;font-size:16px;">Halaman "<b>/${cleanSlug}</b>" belum Anda buat di Google Sheets (Sheet Pages).</p>
+                                <a href="/" style="background:#4f46e5;color:#fff;padding:15px 30px;text-decoration:none;border-radius:12px;font-weight:bold;box-shadow:0 10px 15px -3px rgba(79,70,229,0.3);">Kembali ke Beranda</a>
+                            </div>`;
+                        });
+                        return;
+                    }
+                }
+
+                // JIKA KEMBALI KE KATALOG DEFAULT
+                if (cleanSlug === '') {
+                    localStorage.setItem(USE_CUSTOM_HOME_FLAG, 'false');
+                    localStorage.removeItem(CACHE_KEY_HOME);
+
+                    executeTransition(() => {
+                        document.documentElement.className = 'mode-default';
+                        
+                        const cachedCatStr = localStorage.getItem(CACHE_KEY_CATALOG);
+                        if (cachedCatStr) renderCatalog(JSON.parse(cachedCatStr));
+
+                        const queryCat = encodeURIComponent(`SELECT * WHERE F = 'Active'`);
+                        fetch(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=Access_Rules&tq=${queryCat}`)
+                        .then(res => res.text())
+                        .then(text => {
+                            if(!text.includes('<html')) {
+                                const json = JSON.parse(text.substring(47).slice(0, -2));
+                                const katalogData = [];
+                                json.table.rows.forEach(row => {
+                                    const c = row.c;
+                                    katalogData.push({ id: c[0]?c[0].v:'', nama: c[1]?c[1].v:'', deskripsi: c[2]?c[2].v:'', harga: c[4]?(c[4].f||c[4].v):0, lp_url: c[6]?c[6].v:'' });
+                                });
+                                const freshCatStr = JSON.stringify(katalogData);
+                                if (cachedCatStr !== freshCatStr) {
+                                    localStorage.setItem(CACHE_KEY_CATALOG, freshCatStr);
+                                    renderCatalog(katalogData);
+                                }
+                            }
+                        }).catch(e => {});
+                    });
+                }
+
+            } catch (err) {
+                if (cleanSlug === '') {
+                    executeTransition(() => {
+                        document.documentElement.className = 'mode-default';
+                        const cachedCatStr = localStorage.getItem(CACHE_KEY_CATALOG);
+                        if (cachedCatStr) renderCatalog(JSON.parse(cachedCatStr));
+                    });
+                } else {
+                    executeTransition(() => {
+                        document.body.innerHTML = '<div style="font-family:sans-serif;text-align:center;padding-top:100px;background:#f8f9fa;height:100vh;"><h1 style="font-size:80px;margin:0;color:#1e293b;">Error</h1><p style="color:#64748b;margin-bottom:30px;">Gagal terhubung ke Google Sheets.</p><a href="/" style="background:#4f46e5;color:#fff;padding:15px 30px;text-decoration:none;border-radius:10px;font-weight:bold;">Kembali ke Beranda</a></div>';
+                    });
+                }
+            }
+        }
+
+        fetchPageDataFast();
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if(typeof lucide !== 'undefined') lucide.createIcons();
+            const yearEl = document.getElementById('current-year');
+            if(yearEl) yearEl.textContent = new Date().getFullYear();
+        });
+    </script>
+</body>
+</html>
