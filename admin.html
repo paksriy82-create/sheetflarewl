@@ -189,7 +189,7 @@
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
                     <h3 class="font-bold text-slate-500 uppercase text-xs tracking-widest">Materi Kelas LMS</h3>
                     <button onclick="openLmsModal()" class="w-full sm:w-auto bg-indigo-600 text-white px-8 py-4 rounded-xl font-bold shadow-lg shadow-indigo-200 hover:-translate-y-1 transition-all text-xs uppercase tracking-widest">
-                        + Setup Materi Baru
+                        + Setup Kelas (Multi Video)
                     </button>
                 </div>
                 
@@ -199,7 +199,7 @@
                     </div>
                     <div>
                         <h4 class="font-black text-slate-800 text-sm mb-1">Cara Penggunaan LMS Creator</h4>
-                        <p class="text-xs text-slate-500 leading-relaxed">Pilih produk, masukkan link video dan deskripsi, lalu klik "Generate Link". Salin Link Sakti yang muncul, lalu tempelkan (paste) ke form <b>Link Akses Materi</b> di menu <b>Produk</b>.</p>
+                        <p class="text-xs text-slate-500 leading-relaxed">Pilih produk, tambahkan beberapa video (kurikulum), lalu klik "Generate Link". Salin Link Sakti yang muncul, lalu tempelkan (paste) ke form <b>Link Akses Materi</b> di menu <b>Produk</b>.</p>
                     </div>
                 </div>
 
@@ -208,13 +208,13 @@
                         <thead class="bg-slate-50 text-slate-400 text-[10px] font-black uppercase tracking-widest border-b border-slate-100">
                             <tr>
                                 <th class="p-6 w-[25%]">Produk ID</th>
-                                <th class="p-6 w-[40%]">Judul Materi</th>
+                                <th class="p-6 w-[40%]">Total Video</th>
                                 <th class="p-6 w-[35%] text-right">Link Sakti & Aksi</th>
                             </tr>
                         </thead>
                         <tbody id="list-lms" class="divide-y text-slate-700">
                             <tr>
-                                <td colspan="3" class="p-6 text-center text-xs text-slate-400 italic">Riwayat materi tersimpan akan muncul disini (Opsional, jika disimpan di backend).</td>
+                                <td colspan="3" class="p-6 text-center text-xs text-slate-400 italic">Data kelas yang sudah di-setup akan dikelola langsung oleh backend.</td>
                             </tr>
                         </tbody>
                     </table>
@@ -374,18 +374,24 @@
                         <option value="">-- Muat Produk... --</option>
                     </select>
                 </div>
-                <div>
-                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 mb-2 block">Judul Materi Kelas</label>
-                    <input type="text" id="lms-title" placeholder="Contoh: Modul 1 - Rahasia Iklan Murah" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none font-bold focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all" required>
-                </div>
-                <div>
-                    <label class="text-[10px] font-bold text-indigo-500 uppercase tracking-widest ml-1 mb-2 block">ID Video YouTube (Hanya ID-nya)</label>
-                    <input type="text" id="lms-video" placeholder="Contoh: dQw4w9WgXcQ" class="w-full p-4 bg-indigo-50 border border-indigo-200 text-indigo-700 rounded-xl outline-none font-mono text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all" required>
-                    <p class="text-[9px] text-slate-400 mt-2 ml-1">*ID Video adalah kode setelah <span class="font-mono bg-slate-100 px-1 rounded text-slate-600">v=</span> di link YouTube. Contoh: youtube.com/watch?v=<b class="text-indigo-500">dQw4w9WgXcQ</b></p>
+                
+                <div class="border border-slate-200 p-4 rounded-2xl bg-slate-50/50">
+                    <div class="mb-3 flex justify-between items-center">
+                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 block">Daftar Video / Kurikulum</label>
+                        <button type="button" onclick="addVideoInput()" class="text-xs font-bold text-indigo-600 bg-indigo-100 px-3 py-1.5 rounded-lg hover:bg-indigo-200 transition-colors shadow-sm">+ Tambah Video</button>
+                    </div>
+                    
+                    <div id="video-list-container" class="space-y-3 max-h-64 overflow-y-auto custom-scroll p-1">
+                        <div class="video-item bg-white border border-slate-200 p-4 rounded-xl relative shadow-sm">
+                            <input type="text" placeholder="Judul Video (Misal: Bab 1 - Mindset)" class="vid-title w-full p-3 mb-3 bg-slate-50 border border-slate-200 rounded-lg outline-none font-bold focus:border-indigo-500 text-sm" required>
+                            <input type="text" placeholder="ID YouTube (Misal: dQw4w9WgXcQ)" class="vid-id w-full p-3 bg-indigo-50/50 border border-indigo-100 rounded-lg outline-none font-mono text-sm focus:border-indigo-500 text-indigo-700" required>
+                        </div>
+                    </div>
+                    <p class="text-[9px] text-slate-400 mt-3 ml-1">*ID YouTube adalah kode acak setelah <span class="font-mono bg-slate-200 px-1 rounded text-slate-600">v=</span>. (Contoh: youtube.com/watch?v=<b class="text-indigo-500">dQw4w9WgXcQ</b>)</p>
                 </div>
                 
                 <div>
-                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1 flex items-center gap-2">Deskripsi / Penjelasan Teks</label>
+                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1 flex items-center gap-2">Deskripsi Kelas / Pengumuman</label>
                     <div class="flex flex-wrap gap-2 p-3 bg-slate-100 border border-slate-200 rounded-t-xl border-b-0">
                         <button type="button" onclick="insertAtCursor('lms-desc', '<b>Teks Tebal</b>')" class="px-3 py-1 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-700 shadow-sm">Tebal</button>
                         <button type="button" onclick="insertAtCursor('lms-desc', '<i>Teks Miring</i>')" class="px-3 py-1 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-700 shadow-sm">Miring</button>
@@ -404,7 +410,7 @@
                 </div>
 
                 <div class="flex flex-col sm:flex-row gap-4 pt-4">
-                    <button type="button" onclick="closeModal('modal-lms')" class="p-4 font-bold text-slate-400 order-2 sm:order-1">BATAL / TUTUP</button>
+                    <button type="button" onclick="closeModal('modal-lms')" class="p-4 font-bold text-slate-400 order-2 sm:order-1 hover:text-slate-600 transition-colors">BATAL / TUTUP</button>
                     <button type="submit" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white p-5 rounded-xl font-black shadow-lg shadow-indigo-200 uppercase text-xs order-1 sm:order-2 transition-all flex justify-center items-center gap-2"><i data-lucide="zap" class="w-4 h-4"></i> Simpan & Generate Link Sakti</button>
                 </div>
             </form>
@@ -746,11 +752,36 @@
 
         function copyLink() { const c = document.getElementById('media-url-res'); c.select(); document.execCommand('copy'); showToast('Berhasil dicopy!', 'success'); }
         
-        // --- Fungsi Khusus LMS ---
+        // --- Fungsi Khusus LMS (Multi Video) ---
         function openLmsModal() {
             document.getElementById('form-lms').reset();
             document.getElementById('lms-result-box').classList.add('hidden');
+            
+            // Reset list video ke 1 default saja
+            const container = document.getElementById('video-list-container');
+            container.innerHTML = `
+                <div class="video-item bg-white border border-slate-200 p-4 rounded-xl relative shadow-sm">
+                    <input type="text" placeholder="Judul Video (Misal: Bab 1 - Mindset)" class="vid-title w-full p-3 mb-3 bg-slate-50 border border-slate-200 rounded-lg outline-none font-bold focus:border-indigo-500 text-sm" required>
+                    <input type="text" placeholder="ID YouTube (Misal: dQw4w9WgXcQ)" class="vid-id w-full p-3 bg-indigo-50/50 border border-indigo-100 rounded-lg outline-none font-mono text-sm focus:border-indigo-500 text-indigo-700" required>
+                </div>
+            `;
+            
             document.getElementById('modal-lms').classList.remove('hidden');
+        }
+
+        function addVideoInput() {
+            const container = document.getElementById('video-list-container');
+            const div = document.createElement('div');
+            div.className = 'video-item bg-white border border-slate-200 p-4 rounded-xl relative shadow-sm mb-3';
+            div.innerHTML = `
+                <button type="button" onclick="this.parentElement.remove()" class="absolute top-2 right-2 text-rose-500 hover:bg-rose-50 p-1.5 rounded-md transition-colors" title="Hapus Video"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                <input type="text" placeholder="Judul Video (Misal: Bab 2 - Setup Awal)" class="vid-title w-full p-3 mb-3 bg-slate-50 border border-slate-200 rounded-lg outline-none font-bold focus:border-indigo-500 text-sm" required>
+                <input type="text" placeholder="ID YouTube (Misal: dQw4w9WgXcQ)" class="vid-id w-full p-3 bg-indigo-50/50 border border-indigo-100 rounded-lg outline-none font-mono text-sm focus:border-indigo-500 text-indigo-700" required>
+            `;
+            container.appendChild(div);
+            lucide.createIcons();
+            // Scroll ke bawah otomatis
+            container.scrollTop = container.scrollHeight;
         }
 
         function copyLmsLink() {
@@ -768,12 +799,26 @@
             btn.disabled = true;
             lucide.createIcons();
 
+            // Tangkap semua input video
+            const videoItems = document.querySelectorAll('.video-item');
+            const videosArray = [];
+            videoItems.forEach(item => {
+                const title = item.querySelector('.vid-title').value;
+                const vidId = item.querySelector('.vid-id').value;
+                if(title && vidId) videosArray.push({ title, id: vidId });
+            });
+
+            if (videosArray.length === 0) {
+                showToast('Minimal harus ada 1 video!', 'warning');
+                btn.innerHTML = originalText; btn.disabled = false;
+                return;
+            }
+
             const p_id = document.getElementById('lms-product-id').value;
             const payload = {
                 action: 'save_lms_materi',
                 product_id: p_id,
-                title: document.getElementById('lms-title').value,
-                video_id: document.getElementById('lms-video').value,
+                videos: JSON.stringify(videosArray), // Kirim array video dalam bentuk string JSON
                 desc: document.getElementById('lms-desc').value
             };
 
@@ -810,7 +855,6 @@
             document.getElementById('tab-'+t).classList.add('active'); 
             document.getElementById('nav-'+t).classList.add('active'); 
             
-            // Perbaikan logic title: jika t === 'lms', ganti nama judul tabnya jadi "LMS Creator"
             let titleText = t.charAt(0).toUpperCase() + t.slice(1);
             if (t === 'orders') titleText = 'Dashboard';
             if (t === 'lms') titleText = 'LMS Creator';
