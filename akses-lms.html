@@ -3,64 +3,187 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Learning Center - SpotDigital</title>
+    <title>Ruang Belajar - Melimpah Digital</title>
+    
     <script src="config.js?v=2026"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8f9fa; overflow: hidden; }
+        .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .module-item { transition: all 0.2s ease-in-out; }
+        .module-item:hover { background-color: #f1f5f9; transform: translateX(4px); }
+        .module-item.active { background-color: #eef2ff; border-left: 4px solid #4f46e5; }
+        .module-item.active .vid-icon { color: #4f46e5; }
+        .module-item.active .vid-title { color: #312e81; }
+    </style>
 </head>
-<body class="bg-slate-50 font-['Plus_Jakarta_Sans']">
-    <div id="loader" class="fixed inset-0 bg-white z-[99] flex items-center justify-center font-bold text-indigo-600 italic animate-pulse">Memverifikasi Akses...</div>
+<body class="text-slate-800 flex flex-col h-screen w-screen">
 
-    <main id="main-content" class="max-w-5xl mx-auto p-6 md:p-10 hidden">
-        <a href="member.html" class="inline-flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-indigo-600 mb-8 uppercase tracking-widest">
-            <i data-lucide="arrow-left" class="w-4 h-4"></i> Kembali ke Dashboard
-        </a>
+    <div id="loader" class="fixed inset-0 bg-white z-[999] flex flex-col items-center justify-center font-bold text-indigo-600 transition-opacity">
+        <i data-lucide="loader" class="w-10 h-10 animate-spin mb-4"></i>
+        <p class="uppercase tracking-widest text-xs animate-pulse">Memverifikasi Akses...</p>
+    </div>
 
-        <div class="bg-white rounded-[2.5rem] overflow-hidden shadow-2xl border border-slate-100">
-            <div class="aspect-video bg-black relative">
-                <iframe id="video-frame" class="w-full h-full absolute inset-0" src="" frameborder="0" allowfullscreen></iframe>
-            </div>
-            
-            <div class="p-8 md:p-12">
-                <h1 id="materi-title" class="text-3xl md:text-4xl font-black text-slate-900 mb-6 tracking-tight leading-tight">...</h1>
-                <div class="h-px bg-slate-100 w-full mb-8"></div>
-                <div id="materi-desc" class="prose prose-slate max-w-none text-slate-600 leading-relaxed text-lg">
-                    </div>
+    <header class="bg-white border-b border-slate-200 py-3 px-4 md:px-6 flex items-center justify-between z-30 flex-shrink-0 shadow-sm hidden" id="header-ui">
+        <div class="flex items-center gap-4">
+            <a href="member.html" class="p-2 text-slate-500 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 rounded-xl border border-slate-200 transition-colors flex items-center gap-2 text-xs font-bold uppercase tracking-widest">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i> <span class="hidden md:inline">Dashboard</span>
+            </a>
+            <div class="h-8 w-px bg-slate-200 hidden md:block"></div>
+            <div>
+                <p class="text-[9px] font-bold text-indigo-500 uppercase tracking-widest mb-0.5">Sedang Dipelajari</p>
+                <h1 id="header-product-id" class="text-sm md:text-base font-black text-slate-800 leading-none truncate max-w-[200px] md:max-w-md">Memuat Data...</h1>
             </div>
         </div>
+    </header>
+
+    <main class="flex-1 flex flex-col lg:flex-row overflow-hidden relative hidden" id="main-ui">
+        
+        <div class="w-full lg:w-[70%] xl:w-[75%] h-full overflow-y-auto custom-scroll bg-slate-50 relative pb-20 lg:pb-0">
+            
+            <div class="w-full bg-slate-900 aspect-video relative flex items-center justify-center shadow-inner group">
+                <iframe id="video-frame" class="w-full h-full absolute inset-0" src="" frameborder="0" allowfullscreen></iframe>
+            </div>
+
+            <div class="p-6 md:p-10 max-w-5xl mx-auto">
+                <div class="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-8 border-b border-slate-200 pb-6">
+                    <div>
+                        <h2 id="lms-title" class="text-2xl md:text-3xl font-black text-slate-900 mb-2 tracking-tight">Pilih video di samping</h2>
+                    </div>
+                </div>
+
+                <div class="bg-indigo-50/50 border border-indigo-100 rounded-2xl p-6 md:p-8">
+                    <h3 class="text-xs font-black text-indigo-800 uppercase tracking-widest mb-4 flex items-center gap-2"><i data-lucide="book-open" class="w-4 h-4"></i> Deskripsi Kelas</h3>
+                    <div id="lms-desc" class="prose prose-slate max-w-none text-sm md:text-base text-slate-600 leading-relaxed">
+                        </div>
+                </div>
+            </div>
+        </div>
+
+        <aside class="w-full lg:w-[30%] xl:w-[25%] h-[40vh] lg:h-full bg-white border-l border-slate-200 flex flex-col shadow-[-10px_0_15px_-3px_rgba(0,0,0,0.03)] z-20">
+            <div class="p-5 border-b border-slate-100 bg-white sticky top-0 z-10 flex justify-between items-center">
+                <h3 class="font-black text-slate-800 uppercase tracking-widest text-sm">Kurikulum</h3>
+                <span id="video-count" class="bg-indigo-50 text-indigo-600 px-2 py-1 rounded text-[10px] font-bold">0 Video</span>
+            </div>
+            
+            <div id="video-playlist" class="flex-1 overflow-y-auto custom-scroll p-3 space-y-2 pb-10">
+                </div>
+        </aside>
     </main>
 
     <script>
+        let globalVideos = [];
+
         async function verifyAndLoad() {
             const urlParams = new URLSearchParams(window.location.search);
             const productId = urlParams.get('id');
-            const userEmail = sessionStorage.getItem('user_email');
+            // Menarik email dari sessionStorage ATAU localStorage (mengatasi bug lintas-tab)
+            const userEmail = sessionStorage.getItem('user_email') || localStorage.getItem('user_email');
 
-            if (!userEmail || !productId) { window.location.replace('login.html'); return; }
+            if (!productId) {
+                alert("Link materi tidak valid (ID Produk hilang).");
+                window.location.replace('member.html');
+                return;
+            }
+            if (!userEmail) {
+                alert("Sesi login Anda tidak ditemukan. Silakan login kembali.");
+                window.location.replace('login.html');
+                return;
+            }
 
             try {
-                const targetUrl = window.SCRIPT_URL || SCRIPT_URL;
+                const targetUrl = window.SCRIPT_URL || (typeof SCRIPT_URL !== 'undefined' ? SCRIPT_URL : null);
                 const res = await fetch(targetUrl, {
                     method: 'POST',
                     body: JSON.stringify({ action: 'get_lms_materi', email: userEmail, product_id: productId })
                 });
+                
                 const r = await res.json();
 
                 if (r.status === 'success') {
-                    document.getElementById('materi-title').innerText = r.data.title;
-                    document.getElementById('materi-desc').innerHTML = r.data.desc;
-                    document.getElementById('video-frame').src = `https://www.youtube.com/embed/${r.data.video_id}?rel=0&modestbranding=1`;
+                    // Update UI Teks
+                    document.getElementById('header-product-id').innerText = "Produk: " + r.data.product_id;
+                    document.getElementById('lms-desc').innerHTML = r.data.desc || "<i>Belum ada deskripsi untuk kelas ini.</i>";
                     
-                    document.getElementById('loader').classList.add('hidden');
-                    document.getElementById('main-content').classList.remove('hidden');
+                    // Render Video Playlist
+                    globalVideos = r.data.videos;
+                    document.getElementById('video-count').innerText = globalVideos.length + " Video";
+                    
+                    if (globalVideos.length > 0) {
+                        renderPlaylist();
+                        playVideo(0); // Otomatis play video pertama
+                    } else {
+                        document.getElementById('video-playlist').innerHTML = `<p class="text-xs text-slate-400 text-center mt-10">Belum ada video ditambahkan.</p>`;
+                    }
+
+                    // Tampilkan UI
+                    document.getElementById('loader').style.display = 'none';
+                    document.getElementById('header-ui').classList.remove('hidden');
+                    document.getElementById('main-ui').classList.remove('hidden');
                     lucide.createIcons();
                 } else {
-                    alert("Akses Ditolak: Anda belum membeli produk ini atau sesi berakhir.");
+                    alert("AKSES DITOLAK: " + r.message);
                     window.location.replace('member.html');
                 }
-            } catch (e) { alert("Gagal memverifikasi akses."); }
+            } catch (e) {
+                alert("Terjadi kesalahan sistem. Tidak dapat memverifikasi akses.");
+                window.location.replace('member.html');
+            }
         }
+
+        function renderPlaylist() {
+            const container = document.getElementById('video-playlist');
+            let html = '';
+            
+            globalVideos.forEach((vid, index) => {
+                html += `
+                <button onclick="playVideo(${index})" id="vid-btn-${index}" class="w-full text-left p-3 rounded-xl module-item flex items-start gap-3">
+                    <i data-lucide="play-circle" class="w-5 h-5 text-slate-400 vid-icon mt-0.5 flex-shrink-0 transition-colors"></i>
+                    <div>
+                        <h5 class="font-bold text-slate-600 text-sm line-clamp-2 vid-title transition-colors">${vid.title}</h5>
+                        <p class="text-[10px] text-slate-400 font-medium mt-1">Sesi ${index + 1}</p>
+                    </div>
+                </button>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function playVideo(index) {
+            const vid = globalVideos[index];
+            if(!vid) return;
+
+            // Update Iframe URL (Auto Play = 1, Modestbranding)
+            document.getElementById('video-frame').src = `https://www.youtube.com/embed/${vid.id}?rel=0&modestbranding=1&autoplay=1`;
+            document.getElementById('lms-title').innerText = vid.title;
+
+            // Reset semua class aktif di tombol playlist
+            document.querySelectorAll('.module-item').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.vid-icon').forEach(icon => {
+                icon.classList.remove('text-indigo-600');
+                icon.classList.add('text-slate-400');
+            });
+            
+            // Set tombol yang diklik jadi aktif (biru)
+            const activeBtn = document.getElementById(`vid-btn-${index}`);
+            if(activeBtn) {
+                activeBtn.classList.add('active');
+                const activeIcon = activeBtn.querySelector('.vid-icon');
+                if(activeIcon) {
+                    activeIcon.classList.remove('text-slate-400');
+                    activeIcon.classList.add('text-indigo-600');
+                }
+            }
+            
+            // Re-render icon jika diperlukan
+            lucide.createIcons();
+        }
+
         window.onload = verifyAndLoad;
     </script>
 </body>
