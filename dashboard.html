@@ -371,7 +371,7 @@
                             <h3 class="text-xl font-black text-slate-900 mb-2 leading-tight group-hover:text-indigo-600 transition-colors">${p.title}</h3>
                             <p class="text-xs text-slate-500 mb-8 flex-1 line-clamp-2 leading-relaxed">${p.desc}</p>
                             <div class="pt-5 border-t border-slate-100 flex gap-2">
-                                <a href="/akses?id=${p.id}" class="flex-1 bg-slate-900 text-white px-4 py-3.5 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-indigo-600 transition-colors flex justify-center items-center gap-2">
+                                <a href="${p.url}" class="flex-1 bg-slate-900 text-white px-4 py-3.5 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-indigo-600 transition-colors flex justify-center items-center gap-2">
                                     Materi <i data-lucide="arrow-right" class="w-4 h-4"></i>
                                 </a>
                                 <button onclick="openAffiliateModal('${p.id}', '${p.lp_url || ''}')" class="bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white px-4 py-3.5 rounded-xl transition-colors">
