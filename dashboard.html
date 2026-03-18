@@ -2,72 +2,98 @@
 <html lang="id">
 <head>
     <script>
-        if (!sessionStorage.getItem('user_email')) {
-            window.location.replace('/login');
-        }
+        // ⚡ PENGAMAN 0 DETIK: Tendang penyusup sebelum halaman sempat digambar!
+        if(!sessionStorage.getItem('user_email')) window.location.replace('/login');
     </script>
 
-    <link rel="preconnect" href="https://script.google.com">
-    <link rel="dns-prefetch" href="https://script.google.com">
-    <link rel="preconnect" href="https://script.googleusercontent.com">
-    <link rel="dns-prefetch" href="https://script.googleusercontent.com">
-
-    <script src="config.js?v=2026"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Member Area - Sistem Digital</title>
     
+    <script src="config.js?v=2026"></script>
+
     <script>
         (function() {
+            const CACHE_KEY = 'melimpah_global_settings';
+            const CACHE_AGE = 60 * 60 * 1000; 
             window.waAdminGlobal = '';
             
-            function applyBrandingSapuJagat(data) {
-                if(data.site_favicon) {
-                    let link = document.querySelector("link[rel~='icon']");
-                    if (!link) { link = document.createElement('link'); link.rel = 'icon'; document.head.appendChild(link); }
-                    link.href = data.site_favicon;
+            let cachedFav = localStorage.getItem('site_favicon');
+            
+            function applyFavicon(url) {
+                if(!url) return;
+                let link = document.querySelector("link[rel~='icon']");
+                if (!link) {
+                    link = document.createElement('link');
+                    link.rel = 'icon';
+                    document.head.appendChild(link);
+                }
+                link.href = url;
+            }
+
+            function applyGlobalSettings(data) {
+                if(data.site_name) {
+                    document.title = document.title.replace(/Melimpah Digital/gi, data.site_name).replace(/Melimpah/gi, data.site_name).replace(/Sistem Digital/gi, data.site_name);
                 }
                 if(data.wa_admin) window.waAdminGlobal = data.wa_admin;
-                
-                if(data.site_name) {
-                    // FIX: Judul lebih aman, tidak numpuk
-                    if (!document.title.includes(data.site_name)) {
-                        document.title = "Member Area - " + data.site_name;
+
+                const updateDomElements = () => {
+                    if(data.affiliate_commission) {
+                        const commEl = document.getElementById('display-comm-rate');
+                        if(commEl) commEl.innerText = data.affiliate_commission + '%';
                     }
-                    const updateDomElements = () => {
+                    if(data.site_name) {
                         document.querySelectorAll('.dyn-site-name').forEach(el => el.innerText = data.site_name);
-                    };
-                    if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', updateDomElements); } else { updateDomElements(); }
+                    }
+                    if(data.site_tagline) {
+                        document.querySelectorAll('.dyn-site-tagline').forEach(el => el.innerText = data.site_tagline);
+                    }
+                };
+
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', updateDomElements);
+                } else {
+                    updateDomElements();
                 }
             }
 
-            const cachedStr = localStorage.getItem('melimpah_global_settings');
-            if (cachedStr) {
-                try { applyBrandingSapuJagat(JSON.parse(cachedStr).data); } catch(e){}
-            }
+            if(cachedFav) applyFavicon(cachedFav);
 
-            window.addEventListener('DOMContentLoaded', () => {
-                if(typeof SCRIPT_URL !== 'undefined' && SCRIPT_URL !== 'ISI_DENGAN_LINK_WEB_APP_GOOGLE_SCRIPT_ANDA_DISINI' && SCRIPT_URL !== '') {
-                    fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'get_global_settings' }) })
-                    .then(res => res.json())
-                    .then(r => {
-                        if(r.status === 'success') {
-                            localStorage.setItem('melimpah_global_settings', JSON.stringify({ data: r.data, time: Date.now() }));
-                            applyBrandingSapuJagat(r.data); 
-                        }
-                    }).catch(e => console.log('Branding sync skipped.'));
+            const cachedStr = localStorage.getItem(CACHE_KEY);
+            let cached = null;
+            try { cached = JSON.parse(cachedStr); } catch(e){}
+            const now = Date.now();
+
+            if (cached && cached.data) { applyGlobalSettings(cached.data); }
+
+            if (!cached || !cached.time || (now - cached.time > CACHE_AGE)) {
+                if(typeof window.SCRIPT_URL !== 'undefined' || typeof SCRIPT_URL !== 'undefined') {
+                    const targetUrl = window.SCRIPT_URL || SCRIPT_URL;
+                    fetch(targetUrl, { method: 'POST', body: JSON.stringify({ action: 'get_global_settings' }) })
+                        .then(res => res.json())
+                        .then(r => {
+                            if(r.status === 'success' && r.data) {
+                                localStorage.setItem(CACHE_KEY, JSON.stringify({ data: r.data, time: now }));
+                                applyGlobalSettings(r.data); 
+                                
+                                if(r.data.site_favicon && cachedFav !== r.data.site_favicon) {
+                                    localStorage.setItem('site_favicon', r.data.site_favicon); 
+                                    applyFavicon(r.data.site_favicon); 
+                                }
+                            }
+                        }).catch(e => {});
                 }
-            });
+            }
         })();
     </script>
     
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Member Area</title>
-    
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest" defer></script>
-    
+    <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; overflow: hidden; }
+        
         .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         
@@ -80,7 +106,7 @@
         }
 
         #toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 12px; pointer-events: none; }
-        .toast { display: flex; align-items: center; gap: 12px; padding: 14px 20px; border-radius: 12px; font-size: 13px; font-weight: 700; color: white; opacity: 0; transform: translateY(20px); transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); max-width: 350px; line-height: 1.4; pointer-events: auto;}
+        .toast { display: flex; align-items: center; gap: 12px; padding: 14px 20px; border-radius: 12px; font-size: 13px; font-weight: 700; color: white; opacity: 0; transform: translateY(20px); transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); max-width: 350px; line-height: 1.4; pointer-events: auto;}
         .toast.show { opacity: 1; transform: translateY(0); }
         .toast.success { background-color: #10b981; }
         .toast.error { background-color: #ef4444; }
@@ -98,7 +124,7 @@
     <aside id="sidebar" class="w-72 bg-slate-900 text-slate-400 flex flex-col h-full flex-shrink-0 shadow-2xl relative z-50">
         <div class="p-8 text-2xl font-black text-white tracking-tighter border-b border-slate-800 flex justify-between items-center">
             <span class="flex items-center gap-3">
-                <i data-lucide="layers" class="w-8 h-8 text-indigo-500"></i> <span class="dyn-site-name uppercase">Sistem Digital</span>
+                <i data-lucide="layers" class="w-8 h-8 text-indigo-500"></i> <span class="dyn-site-name uppercase">MELIMPAH</span>
             </span>
             <button onclick="toggleSidebar()" class="md:hidden text-slate-500 hover:text-white transition-colors">
                 <i data-lucide="x" class="w-6 h-6"></i>
@@ -189,7 +215,7 @@
                         <h2 class="text-lg font-black text-slate-800 uppercase tracking-widest">Katalog Produk</h2>
                     </div>
                     <div id="list-available" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                         <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm h-full">
+                        <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm h-full">
                             <div class="h-4 w-20 skeleton rounded-full mb-5"></div>
                             <div class="h-6 w-3/4 skeleton rounded mb-4"></div>
                             <div class="h-3 w-full skeleton rounded mb-2"></div>
@@ -202,7 +228,7 @@
             </div>
             
             <div class="mt-16 text-center border-t border-slate-200 pt-8 max-w-6xl mx-auto">
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em]">&copy; <span class="dyn-site-name">Sistem Digital</span></p>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em]">&copy; 2026 <span class="dyn-site-name">Melimpah Digital</span></p>
             </div>
         </div>
     </main>
@@ -251,10 +277,6 @@
     </div>
 
     <script>
-        function safeCreateIcons() {
-            try { if(typeof lucide !== 'undefined') lucide.createIcons(); } catch(e) {}
-        }
-
         function showToast(message, type = 'success') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
@@ -262,7 +284,7 @@
             let icon = type === 'error' ? 'x-circle' : (type === 'warning' ? 'alert-triangle' : 'check-circle');
             toast.innerHTML = `<i data-lucide="${icon}" class="w-5 h-5 flex-shrink-0"></i> <span>${message}</span>`;
             container.appendChild(toast);
-            safeCreateIcons();
+            lucide.createIcons({ root: toast });
             setTimeout(() => toast.classList.add('show'), 10);
             setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 3000);
         }
@@ -279,7 +301,6 @@
             m.classList.remove('hidden'); void m.offsetWidth; m.classList.remove('opacity-0'); c.classList.remove('scale-95');
             document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebar-overlay').classList.remove('open');
         }
-        
         function closePasswordModal() {
             const m = document.getElementById('password-modal'); const c = document.getElementById('password-modal-content');
             m.classList.add('opacity-0'); c.classList.add('scale-95');
@@ -290,16 +311,12 @@
 
         function openAffiliateModal(productId, lpUrl) {
             const currentUserId = sessionStorage.getItem('user_id') || 'GUEST';
-            const currentOrigin = window.location.origin; 
+            let currentUrl = window.location.href;
+            let dir = currentUrl.substring(0, currentUrl.lastIndexOf('/'));
+            if(dir === "" || dir === currentUrl) dir = window.location.origin; // Fix root URL
             
-            window.tempAffiliateData.checkout_url = `${currentOrigin}/checkout?id=${productId}&ref=${currentUserId}`;
-            
-            if (lpUrl && lpUrl.trim() !== "") {
-                let cleanLpSlug = lpUrl.replace(/^\/|\/$/g, '').trim();
-                window.tempAffiliateData.lp_url = `${currentOrigin}/${cleanLpSlug}?ref=${currentUserId}`;
-            } else {
-                window.tempAffiliateData.lp_url = `${currentOrigin}/?ref=${currentUserId}`;
-            }
+            window.tempAffiliateData.checkout_url = `${dir}/checkout?id=${productId}&ref=${currentUserId}`;
+            window.tempAffiliateData.lp_url = (lpUrl && lpUrl.trim() !== "") ? `${dir}/${lpUrl.replace(/^\/|\/$/g, '').trim()}?ref=${currentUserId}` : `${dir}/?ref=${currentUserId}`;
             
             const m = document.getElementById('affiliate-modal'); const c = document.getElementById('affiliate-modal-content');
             m.classList.remove('hidden'); void m.offsetWidth; m.classList.remove('opacity-0'); c.classList.remove('scale-95');
@@ -325,7 +342,7 @@
         function requestWithdrawal() {
             const saldoEl = document.getElementById('display-saldo-komisi').innerText;
             if(saldoEl === 'Rp 0' || saldoEl.includes('...')) { showToast("Maaf, belum ada saldo yang bisa dicairkan.", "warning"); return; }
-            if(!window.waAdminGlobal) { showToast("Sistem belum memuat data admin, coba muat ulang halaman.", "error"); return; }
+            if(!window.waAdminGlobal) { showToast("Sistem memuat admin, coba lagi.", "error"); return; }
             const dSiteName = document.querySelectorAll('.dyn-site-name').length > 0 ? document.querySelectorAll('.dyn-site-name')[0].innerText : "Admin";
             const waMsg = `Halo ${dSiteName}! 👋\n\nSaya mengajukan pencairan komisi.\n\n👤 *Nama:* ${userNama}\n🆔 *ID Member:* ${userId}\n💰 *Saldo:* ${saldoEl}`;
             window.open(`https://wa.me/${window.waAdminGlobal}?text=${encodeURIComponent(waMsg)}`, '_blank');
@@ -333,30 +350,33 @@
 
         async function prosesGantiPassword(event) {
             if(event) event.preventDefault(); 
-            const oldPassword = document.getElementById('input-password-lama').value;
-            const newPassword = document.getElementById('input-password-baru').value;
-            const confirmPassword = document.getElementById('input-konfirmasi-password').value;
-            
-            if (!oldPassword || !newPassword || !confirmPassword) { showToast("Semua kolom password wajib diisi!", "warning"); return; }
-            if (newPassword !== confirmPassword) { showToast("Password baru dan konfirmasi tidak cocok!", "error"); return; }
+            const pLama = document.getElementById('input-password-lama').value;
+            const pBaru = document.getElementById('input-password-baru').value;
+            const pKonf = document.getElementById('input-konfirmasi-password').value;
+
+            if (pBaru !== pKonf) { return showToast("Password baru dan konfirmasi tidak cocok!", "error"); }
+            if (pBaru.length < 6) { return showToast("Password baru minimal 6 karakter!", "error"); }
 
             showToast("Memproses penggantian password...", "warning");
+            
             try {
-                if(typeof SCRIPT_URL === 'undefined' || SCRIPT_URL === 'ISI_DENGAN_LINK_WEB_APP_GOOGLE_SCRIPT_ANDA_DISINI') throw new Error("Config belum disetting oleh Admin.");
-                const res = await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: 'change_password', email: userEmail, old_password: oldPassword, new_password: newPassword })
+                const targetUrl = window.SCRIPT_URL || (typeof SCRIPT_URL !== 'undefined' ? SCRIPT_URL : null);
+                const res = await fetch(targetUrl, { 
+                    method: 'POST', body: JSON.stringify({ action: 'change_password', email: userEmail, old_password: pLama, new_password: pBaru }) 
                 });
                 const r = await res.json();
-                if (r.status === 'success') {
-                    showToast("Password berhasil diperbarui!", "success");
+                if(r.status === 'success') {
+                    showToast("Password berhasil diubah!", "success");
                     closePasswordModal();
                 } else {
                     showToast(r.message || "Gagal mengubah password.", "error");
                 }
-            } catch (error) { showToast("Terjadi kesalahan koneksi ke server.", "error"); }
+            } catch(e) { showToast("Gagal menghubungi server.", "error"); }
         }
 
+        // =======================================================
+        // 🚀 RENDER SNAPPY (TANPA ANIMASI FADE-IN YANG LAMBAT)
+        // =======================================================
         function renderDashboardUI(r) {
             if (r.total_komisi !== undefined) {
                 document.getElementById('display-saldo-komisi').innerText = 'Rp ' + Number(r.total_komisi).toLocaleString('id-ID');
@@ -397,49 +417,44 @@
                 `;
             }
 
-                const availableContainer = document.getElementById('list-available');
-                if (r.available && r.available.length > 0) {
-                    availableContainer.innerHTML = r.available.reverse().map(p => {
-                        let cleanLpSlug = p.lp_url ? p.lp_url.replace(/^\/|\/$/g, '').trim() : '';
-                        const targetLink = (cleanLpSlug !== "") ? `/${cleanLpSlug}` : `/checkout?id=${p.id}`;
-                        
-                        return `
-                        <div class="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all flex flex-col h-full">
-                            <div class="mb-5"><span class="bg-indigo-50 border border-indigo-100 text-indigo-600 px-3 py-1 rounded-md text-[9px] font-black uppercase tracking-widest inline-flex items-center gap-1"><i data-lucide="tag" class="w-3 h-3"></i> Tersedia</span></div>
-                            <h3 class="text-lg font-black text-slate-900 mb-2 leading-tight">${p.title}</h3>
-                            <p class="text-xs text-slate-500 mb-8 flex-1 line-clamp-2 leading-relaxed">${p.desc}</p>
-                            <span class="text-lg font-black text-slate-900 italic mb-4">Rp ${Number(p.harga).toLocaleString('id-ID')}</span>
-                            <div class="flex gap-2 pt-4 border-t border-slate-50">
-                                <a href="${targetLink}" class="flex-1 bg-indigo-600 text-white px-4 py-3.5 rounded-xl font-bold text-[10px] uppercase tracking-widest text-center hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-100 flex items-center justify-center">Beli Sekarang</a>
-                                <button onclick="openAffiliateModal('${p.id}', '${p.lp_url || ''}')" class="bg-slate-100 text-slate-600 hover:bg-indigo-600 hover:text-white px-4 py-3.5 rounded-xl transition-colors"><i data-lucide="share-2" class="w-4 h-4"></i></button>
-                            </div>
+            // ... (lanjutan kode render list-available biarkan sama seperti aslinya)
+            // ...
+
+            const availableContainer = document.getElementById('list-available');
+            if (r.available && r.available.length > 0) {
+                availableContainer.innerHTML = r.available.reverse().map(p => {
+                    const targetLink = (p.lp_url && p.lp_url !== "") ? `/${p.lp_url.replace(/^\/|\/$/g, '').trim()}` : `/checkout?id=${p.id}`;
+                    return `
+                    <div class="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all flex flex-col h-full">
+                        <div class="mb-5"><span class="bg-indigo-50 border border-indigo-100 text-indigo-600 px-3 py-1 rounded-md text-[9px] font-black uppercase tracking-widest inline-flex items-center gap-1"><i data-lucide="tag" class="w-3 h-3"></i> Tersedia</span></div>
+                        <h3 class="text-lg font-black text-slate-900 mb-2 leading-tight">${p.title}</h3>
+                        <p class="text-xs text-slate-500 mb-8 flex-1 line-clamp-2 leading-relaxed">${p.desc}</p>
+                        <span class="text-lg font-black text-slate-900 italic mb-4">Rp ${Number(p.harga).toLocaleString('id-ID')}</span>
+                        <div class="flex gap-2 pt-4 border-t border-slate-50">
+                            <a href="${targetLink}" class="flex-1 bg-indigo-600 text-white px-4 py-3.5 rounded-xl font-bold text-[10px] uppercase tracking-widest text-center hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-100 flex items-center justify-center">Beli Sekarang</a>
+                            <button onclick="openAffiliateModal('${p.id}', '${p.lp_url || ''}')" class="bg-slate-100 text-slate-600 hover:bg-indigo-600 hover:text-white px-4 py-3.5 rounded-xl transition-colors"><i data-lucide="share-2" class="w-4 h-4"></i></button>
                         </div>
-                        `;
-                    }).join('');
-                } else {
-                    availableContainer.innerHTML = `<p class="col-span-full text-slate-400 font-bold text-center text-xs uppercase tracking-widest py-10">Belum ada produk tambahan.</p>`;
-                }
-            } catch (err) {
-                console.error("Render Error:", err);
+                    </div>
+                    `;
+                }).join('');
+            } else {
+                availableContainer.innerHTML = `<p class="col-span-full text-slate-400 font-bold text-center text-xs uppercase tracking-widest py-10">Belum ada produk tambahan.</p>`;
             }
 
-            safeCreateIcons(); 
+            lucide.createIcons();
         }
 
         async function loadDashboard() {
-            if (!userEmail) return; 
-
             const cacheKeyUser = DASHBOARD_CACHE_KEY + '_' + userEmail;
             const cachedData = localStorage.getItem(cacheKeyUser);
             
-            if(cachedData) {
-                try { renderDashboardUI(JSON.parse(cachedData)); } catch(e){}
-            }
+            // 💡 JURUS UTAMA: Eksekusi Cache Instan
+            if(cachedData) { renderDashboardUI(JSON.parse(cachedData)); }
 
             try {
-                if(typeof SCRIPT_URL === 'undefined' || SCRIPT_URL === 'ISI_DENGAN_LINK_WEB_APP_GOOGLE_SCRIPT_ANDA_DISINI') return;
-                
-                const res = await fetch(SCRIPT_URL, { 
+                if(typeof window.SCRIPT_URL === 'undefined' && typeof SCRIPT_URL === 'undefined') return;
+                const targetUrl = window.SCRIPT_URL || SCRIPT_URL;
+                const res = await fetch(targetUrl, { 
                     method: 'POST', 
                     body: JSON.stringify({ action: 'get_products', email: userEmail }) 
                 });
@@ -455,18 +470,18 @@
                     if(!cachedData) showToast('Gagal memuat data: ' + r.message, 'error'); 
                 }
             } catch (err) { 
-                if(!cachedData) showToast('Terjadi kesalahan koneksi ke server.', 'error'); 
+                if(!cachedData) showToast('Terjadi kesalahan koneksi saat memuat Dashboard.', 'error'); 
             }
         }
 
         function logout() {
             sessionStorage.clear();
             localStorage.removeItem(DASHBOARD_CACHE_KEY + '_' + userEmail);
-            window.location.replace('/login'); 
+            window.location.replace('/login');
         }
 
         window.onload = () => {
-            safeCreateIcons(); 
+            lucide.createIcons();
             loadDashboard();
         };
     </script>
